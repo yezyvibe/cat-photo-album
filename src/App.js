@@ -4,6 +4,8 @@ import ImageView from "./components/ImageView.js";
 import Loading from "./components/Loading.js";
 import { request } from "./utils/api.js";
 
+const cache = {};
+
 export default function App($app) {
   this.state = {
     isRoot: true,
@@ -23,29 +25,82 @@ export default function App($app) {
     initialState: [],
     onClick: async (node) => {
       try {
+        this.setState({
+          ...this.state,
+          isRoot: false,
+          isLoading: true,
+        });
+
         if (node.type === "DIRECTORY") {
-          const nextNodes = await request(node.id);
-          this.setState({
-            ...this.state,
-            depth: [...depth, node],
-            nodes: nextNodes,
-          });
+          if (cache[node.id]) {
+            this.setState({
+              ...this.state,
+              depth: [...this.state.depth, node],
+              nodes: cache[node.id],
+              isLoading: false,
+            });
+          } else {
+            const nextNodes = await request(node.id);
+            this.setState({
+              ...this.state,
+              depth: [...this.state.depth, node],
+              nodes: nextNodes,
+              isLoading: flase,
+            });
+            cache[node.id] = nextNodes;
+          }
         } else if (node.type === "FILE") {
           this.setState({
             ...this.state,
             selectedFilePath: node.filePath,
+            isLoading: false,
           });
         }
       } catch (e) {
         throw new Error(e.message);
       }
     },
+    onBackClick: async () => {
+      try {
+        const nextState = { ...this.state };
+        nextState.depth.pop();
+
+        const prevNodeId =
+          nextState.depth.length === 0
+            ? null
+            : nextState.depth[nextState.depth.length - 1].id;
+
+        // this.setState({
+        //   ...nextState
+        // })
+
+        if (prevNodeId === null) {
+          this.setState({
+            ...nextState,
+            isRoot: true,
+            nodes: cache.rootNodes,
+          });
+        } else {
+          this.setState({
+            ...nextState,
+            isRoot: false,
+            nodes: cache[prevNodeId],
+          });
+        }
+      } catch (err) {
+        new Error(err.message);
+      }
+    },
   });
 
   const imageView = new ImageView({
     $app,
-    initialState: {
-      filePath: this.state.selectedFilePath,
+    initialState: this.state.selectedFilePath,
+    modalClose: () => {
+      this.setState({
+        ...this.state,
+        selectedFilePath: null,
+      });
     },
   });
 
@@ -80,6 +135,7 @@ export default function App($app) {
         nodes: rootNodes,
         isRoot: true,
       });
+      cache.rootNodes = rootNodes;
     } catch (e) {
       throw new Error(e.message);
     } finally {

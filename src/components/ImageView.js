@@ -1,7 +1,7 @@
 const IMAGE_PATH_PREFIX =
   "https://fe-dev-matching-2021-03-serverlessdeploymentbuck-t3kpj3way537.s3.ap-northeast-2.amazonaws.com/public";
 
-export default function ImageView({ $app, initialState }) {
+export default function ImageView({ $app, initialState, modalClose }) {
   this.state = initialState;
 
   this.$target = document.createElement("div");
@@ -13,6 +13,16 @@ export default function ImageView({ $app, initialState }) {
     this.render();
   };
 
+  this.modalClose = modalClose;
+  this.addModalCloseEvent = () => {
+    this.$target.addEventListener("click", (e) => {
+      const $node = e.target.closest(".content");
+      if (!$node) {
+        this.modalClose();
+      }
+    });
+  };
+
   this.render = () => {
     this.$target.innerHTML = `
       <div class="content">
@@ -22,5 +32,7 @@ export default function ImageView({ $app, initialState }) {
     this.$target.style.display = this.state ? "block" : "none";
   };
 
+  // 렌더하기 전에 이벤트를 실행시키는 이유
+  this.addModalCloseEvent();
   this.render();
 }
