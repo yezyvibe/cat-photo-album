@@ -5,7 +5,7 @@ export default function Breadcrumb({ $app, initialState, onClick }) {
   this.$target.className = "Breadcrumb";
   $app.appendChild(this.$target);
 
-  this.state.onClick = onClick;
+  this.onClick = onClick;
 
   this.setState = (nextState) => {
     this.state = nextState;
@@ -25,9 +25,10 @@ export default function Breadcrumb({ $app, initialState, onClick }) {
   };
 
   this.$target.addEventListener("click", (e) => {
-    const $navItem = e.target.closest("nav-item");
+    const $navItem = e.target.closest(".nav-item");
     if ($navItem) {
       const { index } = $navItem.dataset;
+      console.log(this.state);
       this.onClick(index ? parseInt(index, 10) : null);
     }
   });

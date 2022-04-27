@@ -35,7 +35,7 @@ export default function App($app) {
         return;
       }
 
-      const nextState = { ...this.state };
+      // const nextState = { ...this.state };
       const nextDepth = this.state.depth.slice(0, index + 1);
 
       this.setState({
@@ -71,7 +71,7 @@ export default function App($app) {
               ...this.state,
               depth: [...this.state.depth, node],
               nodes: nextNodes,
-              isLoading: flase,
+              isLoading: false,
               isRoot: false,
             });
             cache[node.id] = nextNodes;
@@ -134,9 +134,7 @@ export default function App($app) {
 
   const loading = new Loading({
     $app,
-    initialState: {
-      isLoading: this.state.isLoading,
-    },
+    initialState: this.state.isLoading,
   });
 
   this.setState = (nextState) => {
