@@ -21,6 +21,12 @@ export default function ImageView({ $app, initialState, modalClose }) {
         this.modalClose();
       }
     });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        this.modalClose();
+      }
+    });
   };
 
   this.render = () => {
@@ -32,7 +38,7 @@ export default function ImageView({ $app, initialState, modalClose }) {
     this.$target.style.display = this.state ? "block" : "none";
   };
 
-  // 렌더하기 전에 이벤트를 실행시키는 이유
+  // 렌더하기 전에 이벤트를 실행시키는 이유 -> 이벤트를 달고 렌더링 하기 때문?
   this.addModalCloseEvent();
   this.render();
 }

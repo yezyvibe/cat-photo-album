@@ -1,9 +1,11 @@
-export default function Breadcrumb({ $app, initialState }) {
+export default function Breadcrumb({ $app, initialState, onClick }) {
   this.state = initialState;
 
   this.$target = document.createElement("div");
   this.$target.className = "Breadcrumb";
   $app.appendChild(this.$target);
+
+  this.state.onClick = onClick;
 
   this.setState = (nextState) => {
     this.state = nextState;
@@ -21,6 +23,14 @@ export default function Breadcrumb({ $app, initialState }) {
       .join("")}
     `;
   };
+
+  this.$target.addEventListener("click", (e) => {
+    const $navItem = e.target.closest("nav-item");
+    if ($navItem) {
+      const { index } = $navItem.dataset;
+      this.onClick(index ? parseInt(index, 10) : null);
+    }
+  });
 
   this.render();
 }

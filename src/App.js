@@ -17,7 +17,33 @@ export default function App($app) {
 
   const breadcrumb = new Breadcrumb({
     $app,
-    initialState: this.state.depth,
+    // initialState: this.state.depth,
+    initialState: [], // 빈 배열로 두는 이유?
+    onClick: (index) => {
+      if (index === null) {
+        // root일때
+        this.setState({
+          ...this.state,
+          depth: [],
+          isRoot: true,
+          nodes: cache.rootNodes,
+        });
+        return;
+      }
+      // 현재 디렉토리를 클릭한 경우
+      if (index === this.state.depth.length - 1) {
+        return;
+      }
+
+      const nextState = { ...this.state };
+      const nextDepth = this.state.depth.slice(0, index + 1);
+
+      this.setState({
+        ...this.state,
+        depth: nextDepth,
+        nodes: cache[nextDepth[nextDepth.length - 1].id],
+      });
+    },
   });
 
   const nodes = new Nodes({
@@ -27,7 +53,6 @@ export default function App($app) {
       try {
         this.setState({
           ...this.state,
-          isRoot: false,
           isLoading: true,
         });
 
@@ -35,6 +60,7 @@ export default function App($app) {
           if (cache[node.id]) {
             this.setState({
               ...this.state,
+              isRoot: false,
               depth: [...this.state.depth, node],
               nodes: cache[node.id],
               isLoading: false,
@@ -46,6 +72,7 @@ export default function App($app) {
               depth: [...this.state.depth, node],
               nodes: nextNodes,
               isLoading: flase,
+              isRoot: false,
             });
             cache[node.id] = nextNodes;
           }
@@ -54,6 +81,7 @@ export default function App($app) {
             ...this.state,
             selectedFilePath: node.filePath,
             isLoading: false,
+            // isRoot: false
           });
         }
       } catch (e) {
@@ -127,6 +155,7 @@ export default function App($app) {
     try {
       this.setState({
         ...this.state,
+        isRoot: true,
         isLoading: true,
       });
       const rootNodes = await request();
